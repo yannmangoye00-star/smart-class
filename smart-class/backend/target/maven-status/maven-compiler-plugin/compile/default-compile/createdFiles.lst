@@ -1,0 +1,16 @@
+com\smartclass\dto\AuthRequest.class
+com\smartclass\repository\UserRepository.class
+com\smartclass\security\JwtAuthenticationFilter.class
+com\smartclass\config\SecurityConfig.class
+com\smartclass\security\JwtService.class
+com\smartclass\exception\ApiException.class
+com\smartclass\entity\User$UserBuilder.class
+com\smartclass\exception\GlobalExceptionHandler.class
+com\smartclass\service\UserDetailsServiceImpl.class
+com\smartclass\dto\AuthResponse.class
+com\smartclass\SmartClassApplication.class
+com\smartclass\service\AuthService.class
+com\smartclass\dto\RegisterRequest.class
+com\smartclass\entity\UserRole.class
+com\smartclass\controller\AuthController.class
+com\smartclass\entity\User.class

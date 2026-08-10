@@ -1,0 +1,45 @@
+spring:
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:postgresql://localhost:5432/smartclass
+    username: smartclass
+    password: smartclass
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: false
+  security:
+    user:
+      name: admin
+      password: admin123
+
+server:
+  port: 8080
+
+jwt:
+  secret: smartclass-super-secret-key-should-be-changed-in-production-2026-08-03
+  expiration-ms: 3600000
+
+logging:
+  level:
+    root: INFO
+    com.smartclass: DEBUG
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
+app:
+  cors:
+    allowed-origins: http://localhost:5173
+    allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+    allowed-headers: "*"

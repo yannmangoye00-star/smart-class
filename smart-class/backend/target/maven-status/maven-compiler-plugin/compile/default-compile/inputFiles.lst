@@ -1,0 +1,15 @@
+C:\Users\UltraBook 3.1\OneDrive\Desktop\smartclass-landing-html\smart-class\backend\src\main\java\com\smartclass\config\SecurityConfig.java
+C:\Users\UltraBook 3.1\OneDrive\Desktop\smartclass-landing-html\smart-class\backend\src\main\java\com\smartclass\controller\AuthController.java
+C:\Users\UltraBook 3.1\OneDrive\Desktop\smartclass-landing-html\smart-class\backend\src\main\java\com\smartclass\dto\AuthRequest.java
+C:\Users\UltraBook 3.1\OneDrive\Desktop\smartclass-landing-html\smart-class\backend\src\main\java\com\smartclass\dto\AuthResponse.java
+C:\Users\UltraBook 3.1\OneDrive\Desktop\smartclass-landing-html\smart-class\backend\src\main\java\com\smartclass\dto\RegisterRequest.java
+C:\Users\UltraBook 3.1\OneDrive\Desktop\smartclass-landing-html\smart-class\backend\src\main\java\com\smartclass\entity\User.java
+C:\Users\UltraBook 3.1\OneDrive\Desktop\smartclass-landing-html\smart-class\backend\src\main\java\com\smartclass\entity\UserRole.java
+C:\Users\UltraBook 3.1\OneDrive\Desktop\smartclass-landing-html\smart-class\backend\src\main\java\com\smartclass\exception\ApiException.java
+C:\Users\UltraBook 3.1\OneDrive\Desktop\smartclass-landing-html\smart-class\backend\src\main\java\com\smartclass\exception\GlobalExceptionHandler.java
+C:\Users\UltraBook 3.1\OneDrive\Desktop\smartclass-landing-html\smart-class\backend\src\main\java\com\smartclass\repository\UserRepository.java
+C:\Users\UltraBook 3.1\OneDrive\Desktop\smartclass-landing-html\smart-class\backend\src\main\java\com\smartclass\security\JwtAuthenticationFilter.java
+C:\Users\UltraBook 3.1\OneDrive\Desktop\smartclass-landing-html\smart-class\backend\src\main\java\com\smartclass\security\JwtService.java
+C:\Users\UltraBook 3.1\OneDrive\Desktop\smartclass-landing-html\smart-class\backend\src\main\java\com\smartclass\service\AuthService.java
+C:\Users\UltraBook 3.1\OneDrive\Desktop\smartclass-landing-html\smart-class\backend\src\main\java\com\smartclass\service\UserDetailsServiceImpl.java
+C:\Users\UltraBook 3.1\OneDrive\Desktop\smartclass-landing-html\smart-class\backend\src\main\java\com\smartclass\SmartClassApplication.java

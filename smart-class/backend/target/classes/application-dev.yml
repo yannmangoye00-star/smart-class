@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/smartclass
+    username: smartclass
+    password: smartclass
+  jpa:
+    show-sql: true
+
+logging:
+  level:
+    org.springframework.security: DEBUG
