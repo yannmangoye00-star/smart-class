@@ -1,40 +1,72 @@
-import { Bell, Menu, Search, UserCircle2 } from 'lucide-react';
+import { Search, Bell, CalendarDays, Moon } from "lucide-react";
 
-export default function Navbar({ onToggleSidebar }) {
+export default function Navbar() {
+  const today = new Date().toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-800 bg-slate-950/80 backdrop-blur">
-      <div className="flex items-center justify-between gap-3 px-4 py-3 md:px-6">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onToggleSidebar}
-            className="rounded-xl border border-slate-800 p-2 text-slate-300 md:hidden"
-          >
-            <Menu size={18} />
-          </button>
+    <header className="h-20 bg-white border-b border-slate-200 px-8 flex items-center justify-between shadow-sm">
 
-          <div className="hidden items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-300 md:flex">
-            <Search size={15} />
-            <span>Rechercher</span>
-          </div>
-        </div>
+      {/* Recherche */}
+      <div className="relative w-96">
+        <Search
+          size={18}
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+        />
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="rounded-xl border border-slate-800 p-2 text-slate-300 transition hover:border-orange-400 hover:text-orange-300"
-          >
-            <Bell size={18} />
-          </button>
-          <button
-            type="button"
-            className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-sm font-semibold text-white"
-          >
-            <UserCircle2 size={16} />
-            Admin
-          </button>
-        </div>
+        <input
+          type="text"
+          placeholder="Rechercher un étudiant, un cours..."
+          className="w-full rounded-xl border border-slate-300 py-3 pl-11 pr-4 focus:border-blue-500 focus:outline-none"
+        />
       </div>
+
+      {/* Partie droite */}
+      <div className="flex items-center gap-6">
+
+        <div className="hidden lg:flex items-center gap-2 text-slate-600">
+          <CalendarDays size={18} />
+          <span>{today}</span>
+        </div>
+
+        <button className="rounded-xl p-2 hover:bg-slate-100">
+          <Moon size={20} />
+        </button>
+
+        <button className="relative rounded-xl p-2 hover:bg-slate-100">
+          <Bell size={20} />
+
+          <span className="absolute -right-1 -top-1 h-4 w-4 rounded-full bg-red-500 text-[10px] text-white flex items-center justify-center">
+            3
+          </span>
+        </button>
+
+        <div className="flex items-center gap-3">
+
+          <img
+            src="https://ui-avatars.com/api/?name=Yann+Floyd&background=2563eb&color=fff"
+            alt="avatar"
+            className="h-11 w-11 rounded-full"
+          />
+
+          <div className="hidden md:block">
+            <h3 className="font-semibold text-slate-800">
+              Yann Floyd
+            </h3>
+
+            <p className="text-sm text-slate-500">
+              Administrateur
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
     </header>
   );
 }
