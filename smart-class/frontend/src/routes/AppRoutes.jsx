@@ -10,6 +10,7 @@ import StudentDashboard from '../pages/StudentDashboard.jsx';
 import TeacherDashboard from '../pages/TeacherDashboard.jsx';
 import AdminDashboard from '../pages/AdminDashboard.jsx';
 import ParentDashboard from '../pages/ParentDashboard.jsx';
+import ChildrenPage from '../pages/ChildrenPage.jsx';
 import ProfilePage from '../pages/ProfilePage.jsx';
 import StudentsPage from '../pages/StudentsPage.jsx';
 import TeachersPage from '../pages/TeachersPage.jsx';
@@ -91,15 +92,14 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         />
-
-<Route
-  path="/teacher/courses"
-  element={
-    <ProtectedRoute allowedRoles={['TEACHER']}>
-      <TeacherCourses />
-    </ProtectedRoute>
-  }
-/>
+        <Route
+          path="/teacher/courses"
+          element={
+            <ProtectedRoute allowedRoles={['TEACHER']}>
+              <TeacherCourses />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Espace Admin */}
         <Route
@@ -133,6 +133,22 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={['PARENT']}>
               <ParentDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parent/children"
+          element={
+            <ProtectedRoute allowedRoles={['PARENT']}>
+              <ChildrenPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/parent/my-child"
+          element={
+            <ProtectedRoute allowedRoles={['PARENT']}>
+              <ChildrenPage />
             </ProtectedRoute>
           }
         />

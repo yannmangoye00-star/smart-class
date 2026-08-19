@@ -15,7 +15,7 @@ import {
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
-export default function SidebarParent() {
+export default function SidebarParent({ onOpenAI }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -28,7 +28,7 @@ export default function SidebarParent() {
     {
       name: "Mon enfant",
       icon: Baby,
-      path: "/children",
+      path: "/parent/children", // Mis à jour pour pointer vers la page d'évolution
     },
     {
       name: "Cours",
@@ -58,7 +58,7 @@ export default function SidebarParent() {
     {
       name: "Assistant IA",
       icon: Bot,
-      path: "/assistant",
+      isModalTrigger: true,
     },
     {
       name: "Mon profil",
@@ -79,7 +79,6 @@ export default function SidebarParent() {
 
   return (
     <aside className="flex h-screen w-72 flex-col bg-slate-900 text-white shadow-2xl">
-
       {/* Logo */}
       <div className="border-b border-slate-800 p-6">
         <h1 className="text-2xl font-bold text-blue-400">
@@ -95,6 +94,20 @@ export default function SidebarParent() {
       <nav className="flex-1 overflow-y-auto p-4">
         {menus.map((item) => {
           const Icon = item.icon;
+
+          if (item.isModalTrigger) {
+            return (
+              <button
+                key={item.name}
+                type="button"
+                onClick={onOpenAI}
+                className="mb-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-slate-300 transition hover:bg-slate-800 hover:text-white cursor-pointer"
+              >
+                <Icon size={20} className="text-blue-400" />
+                <span>{item.name}</span>
+              </button>
+            );
+          }
 
           return (
             <NavLink
@@ -117,9 +130,7 @@ export default function SidebarParent() {
 
       {/* Profil */}
       <div className="border-t border-slate-800 p-5">
-
         <div className="mb-5 flex items-center gap-3">
-
           <img
             src={`https://ui-avatars.com/api/?name=${
               user?.name || "Parent"
@@ -137,19 +148,16 @@ export default function SidebarParent() {
               Parent
             </p>
           </div>
-
         </div>
 
         <button
           onClick={handleLogout}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 py-3 font-medium transition hover:bg-red-700"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 py-3 font-medium transition hover:bg-red-700 cursor-pointer"
         >
           <LogOut size={18} />
           Déconnexion
         </button>
-
       </div>
-
     </aside>
   );
 }
