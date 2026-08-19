@@ -1,69 +1,182 @@
-import { BarChart3, BookOpen, Shield, Users } from 'lucide-react';
-import StatCard from '../components/StatCard.jsx';
-import CalendarWidget from '../components/CalendarWidget.jsx';
-import DataTable from '../components/DataTable.jsx';
+import {
+  Users,
+  GraduationCap,
+  BookOpen,
+  ClipboardList,
+} from "lucide-react";
+
+import { Link } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import { useTranslation } from "react-i18next";
+
+import StatCard from "../components/StatCard";
+import DashboardChart from "../components/DashboardChart";
+import ActivityCard from "../components/ActivityCard";
+import QuickActions from "../components/QuickActions";
 
 const adminStats = [
-  { title: 'Comptes actifs', value: '1,284', change: '+42 ce mois', icon: Users, tone: 'blue' },
-  { title: 'Cours publiés', value: '148', change: '+12 cette semaine', icon: BookOpen, tone: 'orange' },
-  { title: 'Taux de réussite', value: '91%', change: '+3.4% vs cible', icon: BarChart3, tone: 'emerald' },
-];
-
-const students = [
-  { id: 1, name: 'Amina K.', className: 'Terminale A', average: '16.8', status: 'Très bien' },
-  { id: 2, name: 'Yasin M.', className: 'Seconde B', average: '14.9', status: 'À surveiller' },
-  { id: 3, name: 'Sara L.', className: 'Première C', average: '17.4', status: 'Excellent' },
-];
-
-const columns = [
-  { key: 'name', label: 'Étudiant' },
-  { key: 'className', label: 'Classe' },
-  { key: 'average', label: 'Moyenne' },
-  { key: 'status', label: 'Statut' },
+  {
+    title: "Étudiants",
+    value: "1 284",
+    change: "+35 ce mois",
+    icon: Users,
+    tone: "blue",
+    link: "/admin/students",
+  },
+  {
+    title: "Enseignants",
+    value: "82",
+    change: "+4 ce mois",
+    icon: GraduationCap,
+    tone: "emerald",
+    link: "/admin/teachers",
+  },
+  {
+    title: "Cours",
+    value: "148",
+    change: "+12 cette semaine",
+    icon: BookOpen,
+    tone: "orange",
+  },
+  {
+    title: "Notes publiées",
+    value: "5 462",
+    change: "+214 aujourd'hui",
+    icon: ClipboardList,
+    tone: "purple",
+  },
 ];
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
+
   return (
-    <section className="space-y-6 px-1 py-3">
-      <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6">
-        <h1 className="text-2xl font-bold text-white">Espace Admin</h1>
-        <p className="mt-1 text-sm text-slate-400">Supervision globale, gestion des accès et reporting institutionnel.</p>
+    <section className="space-y-6">
+
+      {/* =====================================================
+          HEADER
+      ====================================================== */}
+
+      <div className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
+
+        <h1 className="text-3xl font-bold text-white">
+          Bienvenue {user?.name || "Administrateur"} 👋
+        </h1>
+
+        <p className="mt-2 text-slate-400">
+          Gérez toute la plateforme Smart Classe depuis ce tableau de bord.
+        </p>
+
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {adminStats.map((stat) => (
-          <StatCard key={stat.title} {...stat} />
-        ))}
+      {/* =====================================================
+          STATISTIQUES
+      ====================================================== */}
+
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+
+        {adminStats.map((item) => {
+
+          const card = (
+            <StatCard
+              key={item.title}
+              {...item}
+            />
+          );
+
+          if (item.link) {
+            return (
+              <Link
+                key={item.title}
+                to={item.link}
+                className="block transition hover:-translate-y-1"
+              >
+                {card}
+              </Link>
+            );
+          }
+
+          return card;
+        })}
+
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <DataTable
-          title="Tableau des étudiants"
-          subtitle="Suivi académique et niveau de performance"
-          columns={columns}
-          rows={students}
-        />
+      {/* =====================================================
+          GESTION RAPIDE
+      ====================================================== */}
 
-        <CalendarWidget />
+      <div className="grid gap-5 md:grid-cols-2">
+
+        <Link
+          to="/admin/students"
+          className="group rounded-2xl border border-slate-800 bg-slate-900 p-5 transition hover:border-blue-500/50 hover:bg-slate-800"
+        >
+
+          <div className="flex items-center gap-4">
+
+            <div className="rounded-xl bg-blue-500/10 p-3 text-blue-400">
+              <Users size={24} />
+            </div>
+
+            <div>
+              <h2 className="font-semibold text-white">
+                Gestion des étudiants
+              </h2>
+
+              <p className="mt-1 text-xs text-slate-400">
+                Ajouter, modifier et consulter les étudiants.
+              </p>
+            </div>
+
+          </div>
+
+        </Link>
+
+        <Link
+          to="/admin/teachers"
+          className="group rounded-2xl border border-slate-800 bg-slate-900 p-5 transition hover:border-emerald-500/50 hover:bg-slate-800"
+        >
+
+          <div className="flex items-center gap-4">
+
+            <div className="rounded-xl bg-emerald-500/10 p-3 text-emerald-400">
+              <GraduationCap size={24} />
+            </div>
+
+            <div>
+              <h2 className="font-semibold text-white">
+                Gestion des enseignants
+              </h2>
+
+              <p className="mt-1 text-xs text-slate-400">
+                Ajouter et gérer les enseignants de l'établissement.
+              </p>
+            </div>
+
+          </div>
+
+        </Link>
+
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-rose-500/20 bg-slate-900 p-4">
-          <Users className="text-rose-400" size={18} />
-          <h2 className="mt-3 text-lg font-semibold text-white">Comptes</h2>
-          <p className="mt-1 text-sm text-slate-400">Gestion et contrôle des profils.</p>
-        </div>
-        <div className="rounded-2xl border border-amber-500/20 bg-slate-900 p-4">
-          <BarChart3 className="text-amber-400" size={18} />
-          <h2 className="mt-3 text-lg font-semibold text-white">Statistiques</h2>
-          <p className="mt-1 text-sm text-slate-400">Tableau de bord pédagogique et business.</p>
-        </div>
-        <div className="rounded-2xl border border-emerald-500/20 bg-slate-900 p-4">
-          <Shield className="text-emerald-400" size={18} />
-          <h2 className="mt-3 text-lg font-semibold text-white">Sécurité</h2>
-          <p className="mt-1 text-sm text-slate-400">Sécurisation des niveaux d’accès et des flux.</p>
-        </div>
+      {/* =====================================================
+          GRAPHIQUE + ACTIVITÉS
+      ====================================================== */}
+
+      <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
+
+        <DashboardChart />
+
+        <ActivityCard />
+
       </div>
+
+      {/* =====================================================
+          ACCÈS RAPIDE
+      ====================================================== */}
+
+      <QuickActions />
+
     </section>
   );
 }

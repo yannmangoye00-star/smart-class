@@ -1,7 +1,10 @@
-import { Award, BookOpen, CircleCheckBig, Rocket } from 'lucide-react';
+import { useState } from 'react';
+import { Award, BookOpen, CircleCheckBig, Rocket, ChevronRight, LayoutDashboard } from 'lucide-react';
 import StatCard from '../components/StatCard.jsx';
 import SectionCard from '../components/SectionCard.jsx';
 import DataTable from '../components/DataTable.jsx';
+import StudentCourses from '../components/StudentCourses.jsx';
+import { useTranslation } from "react-i18next";
 
 const studentStats = [
   { title: 'Classement', value: '#3', change: 'Top 10% de la classe', icon: Award, tone: 'blue' },
@@ -23,47 +26,152 @@ const columns = [
 ];
 
 export default function StudentDashboard() {
+  // Onglet actif : 'overview' (Vue d'ensemble) ou 'courses' (Mes Cours)
+  const [activeTab, setActiveTab] = useState('overview');
+
   return (
     <section className="space-y-6 px-1 py-3">
-      <div className="rounded-3xl border border-slate-800 bg-slate-900 p-6">
-        <h1 className="text-2xl font-bold text-white">Espace Élève</h1>
-        <p className="mt-1 text-sm text-slate-400">Suivi des résultats, cours et progression personnelle.</p>
+
+      {/* EN-TÊTE ET NAVIGATION PAR ONGLETS */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-3xl border border-slate-800 bg-slate-900 p-6">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Espace Élève</h1>
+          <p className="mt-1 text-sm text-slate-400">Suivi des résultats, cours et progression personnelle.</p>
+        </div>
+
+        {/* SELECTEUR D'ONGLETS */}
+        <div className="flex items-center gap-2 rounded-2xl border border-slate-800 bg-slate-950 p-1.5 self-start sm:self-auto">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+              activeTab === 'overview'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <LayoutDashboard size={15} />
+            Vue d'ensemble
+          </button>
+
+          <button
+            onClick={() => setActiveTab('courses')}
+            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+              activeTab === 'courses'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <BookOpen size={15} />
+            Mes Cours
+          </button>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {studentStats.map((stat) => (
-          <StatCard key={stat.title} {...stat} />
-        ))}
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <SectionCard title="Derniers cours" subtitle="Accès rapide à votre suivi d’apprentissage">
-          <div className="space-y-3 text-sm text-slate-300">
-            <div className="rounded-xl bg-slate-800 p-3">Mathématiques — Fonctions et dérivées</div>
-            <div className="rounded-xl bg-slate-800 p-3">Physique — Mécanique et énergie</div>
-            <div className="rounded-xl bg-slate-800 p-3">Histoire — Analyse de documents</div>
+      {/* CONTENU : ONGLET 1 - VUE D'ENSEMBLE */}
+      {activeTab === 'overview' && (
+        <div className="space-y-6 animate-fadeIn">
+          {/* STATISTIQUES CLEFS */}
+          <div className="grid gap-4 md:grid-cols-3">
+            {studentStats.map((stat) => (
+              <StatCard key={stat.title} {...stat} />
+            ))}
           </div>
-        </SectionCard>
 
-        <DataTable
-          title="Gestion des devoirs"
-          subtitle="Vos tâches et notes en cours"
-          columns={columns}
-          rows={assignments}
-        />
-      </div>
+          {/* SECTION COURS APERÇU + TABLEAU DEVOIRS */}
+          <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+            <SectionCard title="Derniers cours" subtitle="Accès rapide à votre suivi d’apprentissage">
+              <div className="space-y-3 text-sm text-slate-300">
+                <div className="flex items-center justify-between rounded-xl bg-slate-800 p-3 hover:bg-slate-750 transition">
+                  <div>
+                    <p className="font-semibold text-white">Mathématiques</p>
+                    <p className="text-xs text-slate-400">Fonctions et dérivées</p>
+                  </div>
+                  <span className="text-xs text-blue-400 font-medium">89%</span>
+                </div>
 
-      <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5">
-        <div className="mb-4 flex items-center gap-2 text-white">
-          <BookOpen size={18} className="text-blue-400" />
-          <h2 className="font-semibold">Progression de la semaine</h2>
+                <div className="flex items-center justify-between rounded-xl bg-slate-800 p-3 hover:bg-slate-750 transition">
+                  <div>
+                    <p className="font-semibold text-white">Physique</p>
+                    <p className="text-xs text-slate-400">Mécanique et énergie</p>
+                  </div>
+                  <span className="text-xs text-blue-400 font-medium">74%</span>
+                </div>
+
+                <div className="flex items-center justify-between rounded-xl bg-slate-800 p-3 hover:bg-slate-750 transition">
+                  <div>
+                    <p className="font-semibold text-white">Histoire</p>
+                    <p className="text-xs text-slate-400">Analyse de documents</p>
+                  </div>
+                  <span className="text-xs text-blue-400 font-medium">82%</span>
+                </div>
+
+                {/* BOUTON POUR PASSER À LA GESTION COMPLÈTE DES COURS */}
+                <button
+                  onClick={() => setActiveTab('courses')}
+                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600/10 border border-blue-500/20 py-2.5 text-xs font-semibold text-blue-400 hover:bg-blue-600 hover:text-white transition"
+                >
+                  Voir tous les cours et télécharger les supports
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </SectionCard>
+
+            <DataTable
+              title="Gestion des devoirs"
+              subtitle="Vos tâches et notes en cours"
+              columns={columns}
+              rows={assignments}
+            />
+          </div>
+
+          {/* PROGRESSION DE LA SEMAINE */}
+          <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5">
+            <div className="mb-4 flex items-center gap-2 text-white">
+              <BookOpen size={18} className="text-blue-400" />
+              <h2 className="font-semibold">Progression de la semaine</h2>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl bg-slate-800 p-3 text-sm text-slate-300">
+                <div className="flex justify-between mb-1">
+                  <span>Mathématiques</span>
+                  <span className="font-bold text-white">89%</span>
+                </div>
+                <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
+                  <div className="h-full bg-blue-500 rounded-full" style={{ width: '89%' }}></div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-slate-800 p-3 text-sm text-slate-300">
+                <div className="flex justify-between mb-1">
+                  <span>Sciences</span>
+                  <span className="font-bold text-white">74%</span>
+                </div>
+                <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: '74%' }}></div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-slate-800 p-3 text-sm text-slate-300">
+                <div className="flex justify-between mb-1">
+                  <span>Français</span>
+                  <span className="font-bold text-white">82%</span>
+                </div>
+                <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
+                  <div className="h-full bg-orange-500 rounded-full" style={{ width: '82%' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl bg-slate-800 p-3 text-sm text-slate-300">Mathématiques : 89%</div>
-          <div className="rounded-2xl bg-slate-800 p-3 text-sm text-slate-300">Sciences : 74%</div>
-          <div className="rounded-2xl bg-slate-800 p-3 text-sm text-slate-300">Français : 82%</div>
+      )}
+
+      {/* CONTENU : ONGLET 2 - GESTION COMPLÈTE DES COURS */}
+      {activeTab === 'courses' && (
+        <div className="animate-fadeIn">
+          <StudentCourses />
         </div>
-      </div>
+      )}
+
     </section>
   );
 }

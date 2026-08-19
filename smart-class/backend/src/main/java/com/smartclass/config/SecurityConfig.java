@@ -46,7 +46,17 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**")
                         .permitAll()
-                        .anyRequest().authenticated())
+
+                        // AUTORISER LES COURS (Par rôle ou temporairement permitAll pour tester)
+            .requestMatchers("/api/courses/**").hasAnyAuthority("TEACHER", "ADMIN", "ROLE_TEACHER", "ROLE_ADMIN")
+            .anyRequest().authenticated())
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authenticationProvider(authenticationProvider())
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+    
+
+                        .anyRequest().authenticated()
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

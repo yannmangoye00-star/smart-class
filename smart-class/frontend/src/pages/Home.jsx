@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, BookOpen, GraduationCap, LayoutDashboard, ShieldCheck } from 'lucide-react';
+import { useTranslation } from "react-i18next";
 
 export default function Home() {
   return (

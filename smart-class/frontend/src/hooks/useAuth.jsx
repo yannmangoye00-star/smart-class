@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { authService } from '../services/authService.js';
+import authService from '../services/authService.js';
 
 const AuthContext = createContext(null);
 const STORAGE_KEY = 'smartclass-auth-session';
@@ -27,14 +27,10 @@ const clearSession = () => {
 };
 
 const readStoredSession = () => {
-  if (typeof window === 'undefined') {
-    return null;
-  }
+  if (typeof window === 'undefined') return null;
 
   const raw = window.localStorage.getItem(STORAGE_KEY);
-  if (!raw) {
-    return null;
-  }
+  if (!raw) return null;
 
   try {
     const parsed = JSON.parse(raw);
@@ -42,7 +38,6 @@ const readStoredSession = () => {
       clearSession();
       return null;
     }
-
     return parsed;
   } catch {
     clearSession();
@@ -62,19 +57,27 @@ const buildSession = (response) => {
     isAuthenticated: true,
     role,
     user,
-    token: response.token,
+    token: response.token || response.user?.token,
     expiresAt: Date.now() + 1000 * 60 * 60 * 2,
     loading: false,
   };
 };
 
 export function AuthProvider({ children }) {
-  const [auth, setAuth] = useState(() => readStoredSession() || { ...defaultSession, loading: false });
+  // 🎯 FIX 1 : Si un token est en mémoire, on garde loading à true le temps de vérifier la session
+  const [auth, setAuth] = useState(() => {
+    const stored = readStoredSession();
+    if (stored?.token) {
+      return { ...stored, loading: true };
+    }
+    return { ...defaultSession, loading: false };
+  });
 
   useEffect(() => {
     const restoreSession = async () => {
       const stored = readStoredSession();
       if (!stored?.token) {
+        setAuth({ ...defaultSession, loading: false });
         return;
       }
 
@@ -120,8 +123,8 @@ export function AuthProvider({ children }) {
 
     try {
       const response = await authService.login({ email, password, role });
-      if (!response.success) {
-        throw new Error(response.message || 'Connexion impossible.');
+      if (!response || (!response.token && !response.user?.token)) {
+        throw new Error('Identifiants incorrects ou problème serveur.');
       }
 
       const nextSession = buildSession(response);
@@ -151,8 +154,10 @@ export function AuthProvider({ children }) {
 
     try {
       const response = await authService.register({ name, email, password, role });
-      if (!response.success) {
-        throw new Error(response.message || 'Inscription impossible.');
+
+      // 🎯 FIX 2 : Vérification souple compatible avec le JSON direct de Spring Boot
+      if (!response || response.success === false) {
+        throw new Error(response?.message || 'Inscription impossible.');
       }
 
       const nextSession = buildSession(response);
@@ -174,7 +179,7 @@ export function AuthProvider({ children }) {
 
     try {
       const response = await authService.forgotPassword({ email });
-      if (!response.success) {
+      if (response && response.success === false) {
         throw new Error(response.message || 'La demande de réinitialisation a échoué.');
       }
       setAuth((current) => ({ ...current, loading: false }));
@@ -202,7 +207,7 @@ export function AuthProvider({ children }) {
 
     try {
       const response = await authService.resetPassword({ email, token, password });
-      if (!response.success) {
+      if (response && response.success === false) {
         throw new Error(response.message || 'La réinitialisation a échoué.');
       }
       setAuth((current) => ({ ...current, loading: false }));
@@ -226,7 +231,7 @@ export function AuthProvider({ children }) {
 
     try {
       const response = await authService.verifyEmail({ email, code });
-      if (!response.success) {
+      if (response && response.success === false) {
         throw new Error(response.message || 'La vérification a échoué.');
       }
       setAuth((current) => ({ ...current, loading: false }));

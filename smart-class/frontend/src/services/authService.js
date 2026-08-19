@@ -1,93 +1,128 @@
-import api from './api.js';
+import api from "./api";
 
-const normalizeRole = (role) => String(role || 'STUDENT').toUpperCase();
+const STORAGE_KEY = "smartclass-auth-session";
 
-const buildAuthenticatedResponse = (response, fallbackMessage) => {
-  const role = normalizeRole(response.role || response.user?.role);
-  const email = response.email || response.user?.email;
-  const name = response.name || response.user?.name || email?.split('@')[0];
+const authService = {
+  /*
+   * ============================
+   * CONNEXION
+   * ============================
+   */
+  async login(credentials) {
+    const response = await api.post("/auth/login", credentials);
 
-  return {
-    success: true,
-    message: fallbackMessage,
-    token: response.token,
-    user: {
-      email,
-      name,
-      role,
-    },
-  };
-};
+    const session = {
+      token: response.data.token,
+      user: response.data.user,
+    };
 
-const getErrorMessage = (error) => {
-  const apiMessage = error?.response?.data?.message;
-  const apiErrors = error?.response?.data?.errors;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
 
-  if (apiMessage) {
-    return apiMessage;
-  }
+    return response.data;
+  },
 
-  if (apiErrors && typeof apiErrors === 'object') {
-    return Object.values(apiErrors).flat().join(' ');
-  }
+  /*
+   * ============================
+   * INSCRIPTION
+   * ============================
+   */
+  async register(data) {
+    const response = await api.post("/auth/register", data);
+    return response.data;
+  },
 
-  return error?.message || 'Une erreur inattendue s’est produite.';
-};
+  /*
+   * ============================
+   * UTILISATEUR CONNECTÉ
+   * ============================
+   */
+  async me() {
+    const response = await api.get("/auth/me");
+    return response.data;
+  },
 
-export const authService = {
-  login: async (payload) => {
+  /*
+   * ============================
+   * MOT DE PASSE OUBLIÉ
+   * ============================
+   */
+  async forgotPassword(data) {
+    const response = await api.post("/auth/forgot-password", data);
+    return response.data;
+  },
+
+  /*
+   * ============================
+   * RÉINITIALISER MOT DE PASSE
+   * ============================
+   */
+  async resetPassword(data) {
+    const response = await api.post("/auth/reset-password", data);
+    return response.data;
+  },
+
+  /*
+   * ============================
+   * VÉRIFICATION EMAIL
+   * ============================
+   */
+  async verifyEmail(data) {
+    const response = await api.post("/auth/verify-email", data);
+    return response.data;
+  },
+
+  /*
+   * ============================
+   * DÉCONNEXION
+   * ============================
+   */
+  logout() {
+    localStorage.removeItem(STORAGE_KEY);
+  },
+
+  /*
+   * ============================
+   * SESSION
+   * ============================
+   */
+  getSession() {
+    const session = localStorage.getItem(STORAGE_KEY);
+
+    if (!session) return null;
+
     try {
-      const response = await api.post('/auth/login', {
-        ...payload,
-        role: normalizeRole(payload.role),
-      });
-
-      return buildAuthenticatedResponse(response.data, 'Connexion réussie.');
-    } catch (error) {
-      throw new Error(getErrorMessage(error));
+      return JSON.parse(session);
+    } catch {
+      return null;
     }
   },
 
-  register: async (payload) => {
-    try {
-      const response = await api.post('/auth/register', {
-        ...payload,
-        role: normalizeRole(payload.role),
-      });
-
-      return buildAuthenticatedResponse(response.data, 'Inscription réussie.');
-    } catch (error) {
-      throw new Error(getErrorMessage(error));
-    }
+  /*
+   * ============================
+   * TOKEN
+   * ============================
+   */
+  getToken() {
+    return this.getSession()?.token || null;
   },
 
-  getCurrentUser: async () => {
-    try {
-      const response = await api.get('/auth/me');
-      const role = normalizeRole(response.data.roles?.[0]?.replace('ROLE_', '') || 'STUDENT');
-
-      return {
-        success: true,
-        user: {
-          email: response.data.email,
-          name: response.data.email?.split('@')[0],
-          role,
-        },
-      };
-    } catch (error) {
-      throw new Error(getErrorMessage(error));
-    }
+  /*
+   * ============================
+   * UTILISATEUR
+   * ============================
+   */
+  getCurrentUser() {
+    return this.getSession()?.user || null;
   },
 
-  forgotPassword: async () => {
-    throw new Error('La récupération de mot de passe n’est pas encore exposée par l’API Spring Boot.');
-  },
-
-  resetPassword: async () => {
-    throw new Error('La réinitialisation de mot de passe n’est pas encore exposée par l’API Spring Boot.');
-  },
-
-  verifyEmail: async () => {
-    throw new Error('La vérification d’email n’est pas encore exposée par l’API Spring Boot.');
+  /*
+   * ============================
+   * CONNECTÉ ?
+   * ============================
+   */
+  isAuthenticated() {
+    return !!this.getToken();
   },
 };
+
+export default authService;

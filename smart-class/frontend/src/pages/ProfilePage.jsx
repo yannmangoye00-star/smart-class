@@ -1,5 +1,6 @@
 import { Camera, LockKeyhole, UserCircle2, BellRing, Palette } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.jsx';
+import { useTranslation } from "react-i18next";
 import SectionCard from '../components/SectionCard.jsx';
 
 export default function ProfilePage() {

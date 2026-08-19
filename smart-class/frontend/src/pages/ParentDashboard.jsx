@@ -1,6 +1,7 @@
 import { CalendarDays, Users, BookOpen, Trophy } from 'lucide-react';
 import StatCard from '../components/StatCard.jsx';
 import SectionCard from '../components/SectionCard.jsx';
+import { useTranslation } from "react-i18next";
 
 const parentStats = [
   { title: 'Enfants suivis', value: '02', change: '+1 ce mois', icon: Users, tone: 'blue' },

@@ -29,12 +29,12 @@ export default function SidebarAdmin() {
     {
       name: "Étudiants",
       icon: GraduationCap,
-      path: "/students",
+      path: "/admin/students",
     },
     {
       name: "Enseignants",
       icon: Users,
-      path: "/teachers",
+      path: "/admin/teachers",
     },
     {
       name: "Parents",

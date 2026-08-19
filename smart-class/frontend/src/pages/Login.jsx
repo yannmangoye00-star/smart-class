@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { LockKeyhole, Mail, GraduationCap } from 'lucide-react';
+import { useTranslation } from "react-i18next";
 
 const roles = [
   { id: 'student', label: 'Élève' },
