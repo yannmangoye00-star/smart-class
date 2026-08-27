@@ -1,181 +1,43 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Routes, Route, Navigate } from "react-router-dom";
 
-// Pages publiques
-import Home from '../pages/Home.jsx';
-import AuthPage from '../pages/AuthPage.jsx';
+import MainLayout from "../layouts/MainLayout";
+import ProtectedRoute from "../components/ProtectedRoute";
 
-// Pages protégées
-import Dashboard from '../pages/Dashboard.jsx';
-import StudentDashboard from '../pages/StudentDashboard.jsx';
-import TeacherDashboard from '../pages/TeacherDashboard.jsx';
-import AdminDashboard from '../pages/AdminDashboard.jsx';
-import ParentDashboard from '../pages/ParentDashboard.jsx';
-import ChildrenPage from '../pages/ChildrenPage.jsx';
-import ProfilePage from '../pages/ProfilePage.jsx';
-import StudentsPage from '../pages/StudentsPage.jsx';
-import TeachersPage from '../pages/TeachersPage.jsx';
-import EstablishmentsPage from '../pages/EstablishmentsPage.jsx';
+// Pages d'authentification
+import LoginPage from "../pages/Login";
+import RegisterPage from "../pages/register";
 
-// Composants Espace Élève
-import StudentCourses from '../components/StudentCourses.jsx';
-import StudentHomeworks from '../components/StudentHomeworks.jsx';
-import TeacherCourses from '../components/TeacherCourses.jsx';
-
-// Layout & Sécurité
-import ProtectedRoute from '../components/ProtectedRoute.jsx';
-import MainLayout from '../layouts/MainLayout.jsx';
+// Pages des tableaux de bord
+import StudentDashboard from "../pages/StudentDashboard";
+import TeacherDashboard from "../pages/TeacherPage";
+import AdminDashboard from "../pages/AdminDashboard";
+import SuperAdminDashboard from "../pages/SuperAdminDashboard";
+import ParentDashboard from "../pages/ParentDashboard";
 
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* ==================== ROUTES PUBLIQUES ==================== */}
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<AuthPage />} />
-      <Route path="/auth" element={<AuthPage />} />
-      <Route path="/signin" element={<AuthPage />} />
+      {/* Routes Publiques */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
 
-      {/* ==================== SUPER ADMIN ==================== */}
+      {/* Routes Protégées */}
       <Route
-        path="/super-admin/establishments"
         element={
-          <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
-            <EstablishmentsPage />
+          <ProtectedRoute>
+            <MainLayout />
           </ProtectedRoute>
         }
-      />
-
-      {/* ==================== ROUTES AVEC MAIN LAYOUT ==================== */}
-      <Route element={<MainLayout />}>
-        
-        {/* Dashboard générique */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Espace Élève */}
-        <Route
-          path="/student-dashboard"
-          element={
-            <ProtectedRoute allowedRoles={['STUDENT']}>
-              <StudentDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/courses"
-          element={
-            <ProtectedRoute allowedRoles={['STUDENT']}>
-              <StudentCourses />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/devoirs"
-          element={
-            <ProtectedRoute allowedRoles={['STUDENT']}>
-              <StudentHomeworks />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Espace Enseignant */}
-        <Route
-          path="/teacher-dashboard"
-          element={
-            <ProtectedRoute allowedRoles={['TEACHER']}>
-              <TeacherDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/teacher/courses"
-          element={
-            <ProtectedRoute allowedRoles={['TEACHER']}>
-              <TeacherCourses />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Espace Admin */}
-        <Route
-          path="/admin-dashboard"
-          element={
-            <ProtectedRoute allowedRoles={['ADMIN']}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/students"
-          element={
-            <ProtectedRoute allowedRoles={['ADMIN']}>
-              <StudentsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/teachers"
-          element={
-            <ProtectedRoute allowedRoles={['ADMIN']}>
-              <TeachersPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Espace Parent */}
-        <Route
-          path="/parent-dashboard"
-          element={
-            <ProtectedRoute allowedRoles={['PARENT']}>
-              <ParentDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/parent/children"
-          element={
-            <ProtectedRoute allowedRoles={['PARENT']}>
-              <ChildrenPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/parent/my-child"
-          element={
-            <ProtectedRoute allowedRoles={['PARENT']}>
-              <ChildrenPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Profil Utilisateur */}
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Liste des étudiants (Accessible aux admins et enseignants) */}
-        <Route
-          path="/students"
-          element={
-            <ProtectedRoute allowedRoles={['ADMIN', 'TEACHER']}>
-              <StudentsPage />
-            </ProtectedRoute>
-          }
-        />
+      >
+        <Route path="/student-dashboard" element={<StudentDashboard />} />
+        <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/super-admin-dashboard" element={<SuperAdminDashboard />} />
+        <Route path="/parent-dashboard" element={<ParentDashboard />} />
       </Route>
 
-      {/* Redirection par défaut si la route n'existe pas */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Route de secours */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }

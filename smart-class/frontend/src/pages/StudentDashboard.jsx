@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Award, BookOpen, CircleCheckBig, Rocket, ChevronRight, LayoutDashboard } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Award, BookOpen, CircleCheckBig, Rocket, ChevronRight, LayoutDashboard, LogOut } from 'lucide-react';
 import StatCard from '../components/StatCard.jsx';
 import SectionCard from '../components/SectionCard.jsx';
 import DataTable from '../components/DataTable.jsx';
 import StudentCourses from '../components/StudentCourses.jsx';
+import StudentAiTutor from '../components/StudentAiTutor.jsx';
 import { useTranslation } from "react-i18next";
 
 const studentStats = [
@@ -26,8 +28,14 @@ const columns = [
 ];
 
 export default function StudentDashboard() {
-  // Onglet actif : 'overview' (Vue d'ensemble) ou 'courses' (Mes Cours)
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login', { replace: true });
+  };
 
   return (
     <section className="space-y-6 px-1 py-3">
@@ -39,30 +47,39 @@ export default function StudentDashboard() {
           <p className="mt-1 text-sm text-slate-400">Suivi des résultats, cours et progression personnelle.</p>
         </div>
 
-        {/* SELECTEUR D'ONGLETS */}
-        <div className="flex items-center gap-2 rounded-2xl border border-slate-800 bg-slate-950 p-1.5 self-start sm:self-auto">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
-              activeTab === 'overview'
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <LayoutDashboard size={15} />
-            Vue d'ensemble
-          </button>
+        <div className="flex flex-wrap items-center gap-3 self-start sm:self-auto">
+          <div className="flex items-center gap-2 rounded-2xl border border-slate-800 bg-slate-950 p-1.5">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+                activeTab === 'overview'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <LayoutDashboard size={15} />
+              Vue d'ensemble
+            </button>
+
+            <button
+              onClick={() => setActiveTab('courses')}
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+                activeTab === 'courses'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <BookOpen size={15} />
+              Mes Cours
+            </button>
+          </div>
 
           <button
-            onClick={() => setActiveTab('courses')}
-            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
-              activeTab === 'courses'
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                : 'text-slate-400 hover:text-white'
-            }`}
+            onClick={handleLogout}
+            className="flex items-center gap-2 rounded-2xl border border-red-500/30 bg-red-600/10 px-4 py-2 text-xs font-semibold text-red-400 transition hover:bg-red-600 hover:text-white"
           >
-            <BookOpen size={15} />
-            Mes Cours
+            <LogOut size={15} />
+            Déconnexion
           </button>
         </div>
       </div>
@@ -105,7 +122,6 @@ export default function StudentDashboard() {
                   <span className="text-xs text-blue-400 font-medium">82%</span>
                 </div>
 
-                {/* BOUTON POUR PASSER À LA GESTION COMPLÈTE DES COURS */}
                 <button
                   onClick={() => setActiveTab('courses')}
                   className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600/10 border border-blue-500/20 py-2.5 text-xs font-semibold text-blue-400 hover:bg-blue-600 hover:text-white transition"
@@ -123,6 +139,9 @@ export default function StudentDashboard() {
               rows={assignments}
             />
           </div>
+
+          {/* TUTEUR IA INTERACTIF */}
+          <StudentAiTutor />
 
           {/* PROGRESSION DE LA SEMAINE */}
           <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5">

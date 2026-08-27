@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Bot, Send, User, Sparkles, X, RefreshCw, MessageSquare } from "lucide-react";
+import { Bot, Send, User, Sparkles, X, RefreshCw } from "lucide-react";
 
 const quickPrompts = [
   "Résumé du travail de Marc cette semaine",
@@ -7,7 +7,7 @@ const quickPrompts = [
   "Quels sont les prochains devoirs urgents ?",
 ];
 
-export default function ParentAIAssistant({ isOpen, onClose, childName = "Marc" }) {
+export default function ParentAIAssistant({ isOpen, onClose, childName = "Marc Floyd", parentName = "Parent", childClass = "Terminale C" }) {
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -28,9 +28,9 @@ export default function ParentAIAssistant({ isOpen, onClose, childName = "Marc" 
     scrollToBottom();
   }, [messages, isTyping]);
 
-  const handleSend = (textToSend) => {
+  const handleSend = async (textToSend) => {
     const query = textToSend || input;
-    if (!query.trim()) return;
+    if (!query.trim() || isTyping) return;
 
     const userMsg = {
       id: Date.now(),
@@ -43,17 +43,47 @@ export default function ParentAIAssistant({ isOpen, onClose, childName = "Marc" 
     if (!textToSend) setInput("");
     setIsTyping(true);
 
-    // Simulation de la réponse de l'IA
-    setTimeout(() => {
+    try {
+      // Requete HTTP vers le backend Spring Boot
+      const response = await fetch("http://localhost:8080/api/ai/parent-assistant", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          parentName: parentName,
+          studentName: childName,
+          studentClass: childClass,
+          userPrompt: query,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur réseau");
+      }
+
+      const data = await response.json();
+
       const aiMsg = {
         id: Date.now() + 1,
         sender: "ai",
-        text: `D'après les dernières données de ${childName}, ses résultats en Mathématiques sont solides (89%). Cependant, il a 2 devoirs urgents à rendre d'ici la fin de la semaine. Souhaitez-vous que je vous détaille les chapitres concernés ?`,
+        text: data.reply,
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
+
       setMessages((prev) => [...prev, aiMsg]);
+    } catch (error) {
+      console.error("❌ Erreur d'appel API :", error);
+      const errorMsg = {
+        id: Date.now() + 1,
+        sender: "ai",
+        text: "Désolé, une erreur est survenue lors de la connexion avec l'assistant. Veuillez réessayer.",
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
       setIsTyping(false);
-    }, 1200);
+    }
   };
 
   if (!isOpen) return null;
@@ -75,7 +105,7 @@ export default function ParentAIAssistant({ isOpen, onClose, childName = "Marc" 
               <p className="text-xs text-slate-400">Suivi personnalisé pour {childName}</p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-xl p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition">
+          <button onClick={onClose} className="rounded-xl p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition cursor-pointer">
             <X size={20} />
           </button>
         </div>
@@ -99,7 +129,7 @@ export default function ParentAIAssistant({ isOpen, onClose, childName = "Marc" 
                 className={`max-w-[80%] rounded-2xl p-4 text-sm leading-relaxed ${
                   msg.sender === "user"
                     ? "bg-blue-600 text-white rounded-tr-none"
-                    : "bg-slate-950 border border-slate-800 text-slate-200 rounded-tl-none"
+                    : "bg-slate-950 border border-slate-800 text-slate-200 rounded-tl-none whitespace-pre-wrap"
                 }`}
               >
                 <p>{msg.text}</p>
@@ -114,7 +144,7 @@ export default function ParentAIAssistant({ isOpen, onClose, childName = "Marc" 
                 <Bot size={16} />
               </div>
               <div className="rounded-2xl rounded-tl-none border border-slate-800 bg-slate-950 p-4 text-xs text-slate-400 flex items-center gap-2">
-                <RefreshCw size={14} className="animate-spin text-blue-400" /> L'IA analyse le dossier scolaire...
+                <RefreshCw size={14} className="animate-spin text-blue-400" /> L'IA analyse les données de {childName}...
               </div>
             </div>
           )}
@@ -127,8 +157,9 @@ export default function ParentAIAssistant({ isOpen, onClose, childName = "Marc" 
             {quickPrompts.map((prompt, idx) => (
               <button
                 key={idx}
+                disabled={isTyping}
                 onClick={() => handleSend(prompt)}
-                className="whitespace-nowrap rounded-xl border border-slate-800 bg-slate-800/60 px-3 py-1.5 text-xs text-slate-300 transition hover:border-blue-500 hover:bg-blue-600/10 hover:text-blue-400 cursor-pointer"
+                className="whitespace-nowrap rounded-xl border border-slate-800 bg-slate-800/60 px-3 py-1.5 text-xs text-slate-300 transition hover:border-blue-500 hover:bg-blue-600/10 hover:text-blue-400 cursor-pointer disabled:opacity-50"
               >
                 {prompt}
               </button>
@@ -147,14 +178,15 @@ export default function ParentAIAssistant({ isOpen, onClose, childName = "Marc" 
           <input
             type="text"
             value={input}
+            disabled={isTyping}
             onChange={(e) => setInput(e.target.value)}
             placeholder={`Posez une question sur la scolarité de ${childName}...`}
-            className="flex-1 rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white focus:border-blue-500 focus:outline-none"
+            className="flex-1 rounded-2xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white focus:border-blue-500 focus:outline-none disabled:opacity-50"
           />
           <button
             type="submit"
-            disabled={!input.trim()}
-            className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!input.trim() || isTyping}
+            className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             <Send size={18} />
           </button>

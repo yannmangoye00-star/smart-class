@@ -1,5 +1,18 @@
 import { useState } from "react";
-import { Users, CheckSquare, Award, BookOpen, Calendar, Clock, MessageSquare, X, ChevronRight, AlertCircle, Bot, Sparkles } from "lucide-react";
+import {
+  Users,
+  CheckSquare,
+  Award,
+  BookOpen,
+  Calendar,
+  Clock,
+  MessageSquare,
+  X,
+  ChevronRight,
+  AlertCircle,
+  Bot,
+  Sparkles,
+} from "lucide-react";
 import ParentAIAssistant from "../components/ParentAIAssistant.jsx";
 
 const childrenList = [
@@ -43,7 +56,11 @@ export default function ParentDashboard() {
             <Users size={18} className="ml-2 text-blue-400" />
             <select
               value={selectedChild.id}
-              onChange={(e) => setSelectedChild(childrenList.find((c) => c.id === Number(e.target.value)))}
+              onChange={(e) =>
+                setSelectedChild(
+                  childrenList.find((c) => c.id === Number(e.target.value)) || childrenList[0]
+                )
+              }
               className="bg-transparent text-sm font-medium text-white focus:outline-none cursor-pointer pr-2"
             >
               {childrenList.map((child) => (
@@ -80,7 +97,7 @@ export default function ParentDashboard() {
             </div>
           </div>
           <div className="mt-2 text-3xl font-bold text-white">07</div>
-          <p className="mt-1 text-xs text-rose-400 font-medium">2 urgents (cliquer pour voir)</p>
+          <p className="mt-1 text-xs font-medium text-rose-400">2 urgents (cliquer pour voir)</p>
         </button>
 
         <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 shadow-xl">
@@ -156,22 +173,28 @@ export default function ParentDashboard() {
           <div className="w-full max-w-lg rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <h3 className="text-lg font-bold">Devoirs à valider</h3>
-              <button onClick={() => setActiveModal(null)} className="text-slate-400 hover:text-white">
+              <button
+                onClick={() => setActiveModal(null)}
+                className="text-slate-400 hover:text-white cursor-pointer"
+              >
                 <X size={20} />
               </button>
             </div>
-            <div className="mt-4 space-y-3 max-h-80 overflow-y-auto pr-1">
+            <div className="mt-4 max-h-80 space-y-3 overflow-y-auto pr-1">
               {pendingHomeworks.map((hw) => (
-                <div key={hw.id} className="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 p-3.5">
+                <div
+                  key={hw.id}
+                  className="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 p-3.5"
+                >
                   <div>
                     <span className="text-xs font-semibold text-blue-400">{hw.subject}</span>
                     <h4 className="text-sm font-medium text-white">{hw.title}</h4>
-                    <p className="text-xs text-slate-400 flex items-center gap-1 mt-1">
+                    <p className="mt-1 flex items-center gap-1 text-xs text-slate-400">
                       <Clock size={12} /> À rendre pour le {hw.dueDate}
                     </p>
                   </div>
                   {hw.urgent && (
-                    <span className="rounded-lg bg-rose-500/20 px-2.5 py-1 text-xs font-medium text-rose-400 flex items-center gap-1">
+                    <span className="flex items-center gap-1 rounded-lg bg-rose-500/20 px-2.5 py-1 text-xs font-medium text-rose-400">
                       <AlertCircle size={12} /> Urgent
                     </span>
                   )}
@@ -188,18 +211,32 @@ export default function ParentDashboard() {
           <div className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <h3 className="text-lg font-bold">Détails du rendez-vous</h3>
-              <button onClick={() => setActiveModal(null)} className="text-slate-400 hover:text-white">
+              <button
+                onClick={() => setActiveModal(null)}
+                className="text-slate-400 hover:text-white cursor-pointer"
+              >
                 <X size={20} />
               </button>
             </div>
             <div className="mt-4 space-y-3 text-sm text-slate-300">
-              <p><strong className="text-white">Événement :</strong> Réunion trimestrielle des parents</p>
-              <p><strong className="text-white">Date & Heure :</strong> Mardi 25 Août à 18h30</p>
-              <p><strong className="text-white">Lieu :</strong> Salle de conférence (Bâtiment A)</p>
-              <p><strong className="text-white">Ordre du jour :</strong> Bilan pédagogique et préparation des examens.</p>
+              <p>
+                <strong className="text-white">Événement :</strong> Réunion trimestrielle des parents
+              </p>
+              <p>
+                <strong className="text-white">Date & Heure :</strong> Mardi 25 Août à 18h30
+              </p>
+              <p>
+                <strong className="text-white">Lieu :</strong> Salle de conférence (Bâtiment A)
+              </p>
+              <p>
+                <strong className="text-white">Ordre du jour :</strong> Bilan pédagogique et préparation des examens.
+              </p>
             </div>
             <div className="mt-6 flex justify-end">
-              <button onClick={() => setActiveModal(null)} className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+              <button
+                onClick={() => setActiveModal(null)}
+                className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 cursor-pointer"
+              >
                 Fermer
               </button>
             </div>
@@ -212,6 +249,7 @@ export default function ParentDashboard() {
         isOpen={isAIOpen}
         onClose={() => setIsAIOpen(false)}
         childName={selectedChild.name}
+        childClass={selectedChild.class}
       />
     </section>
   );

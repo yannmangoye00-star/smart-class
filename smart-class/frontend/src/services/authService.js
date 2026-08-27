@@ -11,14 +11,28 @@ const authService = {
   async login(credentials) {
     const response = await api.post("/auth/login", credentials);
 
+    const data = response.data;
+
     const session = {
-      token: response.data.token,
-      user: response.data.user,
+      token: data.token,
+
+      user: {
+        email: data.email,
+        name: data.name,
+        role: String(data.role || "STUDENT").toUpperCase(),
+      },
     };
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(session)
+    );
 
-    return response.data;
+    return {
+      ...data,
+      success: true,
+      user: session.user,
+    };
   },
 
   /*
@@ -27,7 +41,11 @@ const authService = {
    * ============================
    */
   async register(data) {
-    const response = await api.post("/auth/register", data);
+    const response = await api.post(
+      "/auth/register",
+      data
+    );
+
     return response.data;
   },
 
@@ -38,6 +56,7 @@ const authService = {
    */
   async me() {
     const response = await api.get("/auth/me");
+
     return response.data;
   },
 
@@ -47,7 +66,11 @@ const authService = {
    * ============================
    */
   async forgotPassword(data) {
-    const response = await api.post("/auth/forgot-password", data);
+    const response = await api.post(
+      "/auth/forgot-password",
+      data
+    );
+
     return response.data;
   },
 
@@ -57,7 +80,11 @@ const authService = {
    * ============================
    */
   async resetPassword(data) {
-    const response = await api.post("/auth/reset-password", data);
+    const response = await api.post(
+      "/auth/reset-password",
+      data
+    );
+
     return response.data;
   },
 
@@ -67,7 +94,11 @@ const authService = {
    * ============================
    */
   async verifyEmail(data) {
-    const response = await api.post("/auth/verify-email", data);
+    const response = await api.post(
+      "/auth/verify-email",
+      data
+    );
+
     return response.data;
   },
 
@@ -86,9 +117,12 @@ const authService = {
    * ============================
    */
   getSession() {
-    const session = localStorage.getItem(STORAGE_KEY);
+    const session =
+      localStorage.getItem(STORAGE_KEY);
 
-    if (!session) return null;
+    if (!session) {
+      return null;
+    }
 
     try {
       return JSON.parse(session);
@@ -121,7 +155,7 @@ const authService = {
    * ============================
    */
   isAuthenticated() {
-    return !!this.getToken();
+    return Boolean(this.getToken());
   },
 };
 

@@ -1,9 +1,13 @@
 import { Search, Bell, CalendarDays, Moon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
+
+  // Authentification
+  const { user, logout } = useAuth();
 
   const today = new Date().toLocaleDateString(
     i18n.language === "en" ? "en-US" : "fr-FR",
@@ -35,6 +39,7 @@ export default function Navbar() {
       {/* Partie droite */}
       <div className="flex items-center gap-6">
 
+        {/* Langue */}
         <LanguageSwitcher />
 
         {/* Date */}
@@ -43,7 +48,7 @@ export default function Navbar() {
           <span>{today}</span>
         </div>
 
-        {/* Mode Sombre */}
+        {/* Mode sombre */}
         <button
           type="button"
           className="rounded-xl p-2 text-slate-300 transition hover:bg-slate-800 hover:text-white"
@@ -65,25 +70,53 @@ export default function Navbar() {
           </span>
         </button>
 
-        {/* Séparateur */}
-        <div className="h-8 w-px bg-slate-800"></div>
+        {/* Profil + menu */}
+        <div className="relative group">
 
-        {/* Profil */}
-        <div className="flex items-center gap-3">
-          <img
-            src="https://ui-avatars.com/api/?name=Yann+Floyd&background=2563eb&color=fff"
-            alt="avatar"
-            className="h-11 w-11 rounded-full border border-slate-700 shadow-sm"
-          />
+          <button
+            type="button"
+            className="flex items-center gap-3"
+          >
+            <img
+              src="https://ui-avatars.com/api/?name=Yann+Floyd&background=2563eb&color=fff"
+              alt="avatar"
+              className="h-11 w-11 rounded-full border border-slate-700 shadow-sm"
+            />
 
-          <div className="hidden md:block">
-            <h3 className="font-semibold text-white leading-tight">
-              Yann Floyd
-            </h3>
+            <div className="hidden md:block text-left">
+              <h3 className="font-semibold text-white">
+                {user?.name || "Utilisateur"}
+              </h3>
 
-            <p className="text-xs text-slate-400">
-              {t("navigation.administrator")}
-            </p>
+              <p className="text-xs text-slate-400">
+                {user?.role || "Utilisateur"}
+              </p>
+            </div>
+          </button>
+
+          {/* Menu profil */}
+          <div className="absolute right-0 top-full z-50 mt-3 hidden w-52 rounded-2xl border border-slate-700 bg-slate-900 p-2 shadow-xl group-hover:block">
+
+            {/* Profil */}
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = "/profile";
+              }}
+              className="w-full rounded-xl px-4 py-2 text-left text-sm text-slate-300 transition hover:bg-slate-800"
+            >
+              👤 Mon profil
+            </button>
+
+            {/* Déconnexion */}
+            <button
+              type="button"
+              onClick={logout}
+              className="w-full rounded-xl px-4 py-2 text-left text-sm text-red-400 transition hover:bg-red-500/10"
+            >
+              🚪 Déconnexion
+            </button>
+
           </div>
         </div>
 

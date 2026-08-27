@@ -1,19 +1,19 @@
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth.jsx';
+import { Navigate } from "react-router-dom";
 
-export default function ProtectedRoute({ children, allowedRoles = [] }) {
-  const { isAuthenticated, role } = useAuth();
-  const location = useLocation();
+export default function ProtectedRoute({ children, allowedRoles }) {
+  const token = localStorage.getItem("token");
+  const storedUserRaw = localStorage.getItem("user");
+  const storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : null;
+  const userRole = storedUser?.role;
 
-  const normalizedRole = String(role || '').toUpperCase();
-  const normalizedAllowedRoles = allowedRoles.map((item) => String(item).toUpperCase());
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  // 1. Si pas connecté (pas de token), redirection vers /login
+  if (!token || !storedUser) {
+    return <Navigate to="/login" replace />;
   }
 
-  if (normalizedAllowedRoles.length > 0 && !normalizedAllowedRoles.includes(normalizedRole)) {
-    return <Navigate to="/dashboard" replace />;
+  // 2. Vérification optionnelle des rôles autorisés
+  if (allowedRoles && !allowedRoles.includes(userRole)) {
+    return <Navigate to="/login" replace />;
   }
 
   return children;
