@@ -1,9 +1,13 @@
 import { Navigate } from "react-router-dom";
+import authService from "../services/authService";
 
 export default function ProtectedRoute({ children, allowedRoles }) {
-  const token = localStorage.getItem("token");
-  const storedUserRaw = localStorage.getItem("user");
-  const storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : null;
+  const session = authService.getSession();
+  const token = session?.token || localStorage.getItem("token");
+  const storedUser = session?.user || (() => {
+    const storedUserRaw = localStorage.getItem("user");
+    return storedUserRaw ? JSON.parse(storedUserRaw) : null;
+  })();
   const userRole = storedUser?.role;
 
   // 1. Si pas connecté (pas de token), redirection vers /login

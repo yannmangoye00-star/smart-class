@@ -4,9 +4,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -40,6 +43,10 @@ public class User {
     @Column(nullable = false)
     private boolean enabled;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "class_id")
+    private SchoolClass schoolClass;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -57,9 +64,9 @@ public class User {
             UserRole role,
             boolean emailVerified,
             boolean enabled,
+            SchoolClass schoolClass,
             Instant createdAt,
-            Instant updatedAt
-    ) {
+            Instant updatedAt) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -67,6 +74,7 @@ public class User {
         this.role = role;
         this.emailVerified = emailVerified;
         this.enabled = enabled;
+        this.schoolClass = schoolClass;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -143,6 +151,14 @@ public class User {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public SchoolClass getSchoolClass() {
+        return schoolClass;
+    }
+
+    public void setSchoolClass(SchoolClass schoolClass) {
+        this.schoolClass = schoolClass;
     }
 
     public Instant getCreatedAt() {

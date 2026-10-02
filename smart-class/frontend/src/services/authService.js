@@ -27,6 +27,8 @@ const authService = {
       STORAGE_KEY,
       JSON.stringify(session)
     );
+    localStorage.setItem("token", session.token);
+    localStorage.setItem("user", JSON.stringify(session.user));
 
     return {
       ...data,
@@ -109,6 +111,8 @@ const authService = {
    */
   logout() {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   },
 
   /*

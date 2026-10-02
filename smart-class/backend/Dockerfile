@@ -1,12 +1,14 @@
-# 1. Étape de compilation Maven avec Java 21
-FROM maven:3.9-eclipse-temurin-21 AS build
+# Build stage
+FROM eclipse-temurin:21-jdk-alpine AS build
 WORKDIR /app
-COPY . .
-RUN mvn clean package -DskipTests -Dmaven.test.skip=true
+RUN apk add --no-cache maven
+COPY pom.xml .
+COPY src ./src
+RUN mvn -B -DskipTests package
 
-# 2. Étape d'exécution avec le JRE 21
-FROM eclipse-temurin:21-jre
+# Runtime stage
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/*.jar /app/app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "-Xmx400m", "app.jar"]
+ENTRYPOINT ["java", "-Xmx400m", "-jar", "/app/app.jar"]

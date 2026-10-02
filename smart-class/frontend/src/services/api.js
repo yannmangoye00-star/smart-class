@@ -11,17 +11,19 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const rawSession = localStorage.getItem("smartclass-auth-session");
+    let token = localStorage.getItem("token");
 
     if (rawSession) {
       try {
         const session = JSON.parse(rawSession);
-
-        if (session?.token) {
-          config.headers.Authorization = `Bearer ${session.token}`;
-        }
+        token = session?.token || token;
       } catch {
         localStorage.removeItem("smartclass-auth-session");
       }
+    }
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
@@ -34,6 +36,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem("smartclass-auth-session");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
 
       if (window.location.pathname !== "/login") {
         window.location.href = "/login";

@@ -13,6 +13,7 @@ import StatCard from "../components/StatCard";
 import DashboardChart from "../components/DashboardChart";
 import ActivityCard from "../components/ActivityCard";
 import QuickActions from "../components/QuickActions";
+import AdminManagement from "../components/AdminManagement";
 
 const adminStats = [
   {
@@ -68,6 +69,8 @@ export default function AdminDashboard() {
         </p>
 
       </div>
+
+      <AdminManagement />
 
       {/* =====================================================
           STATISTIQUES

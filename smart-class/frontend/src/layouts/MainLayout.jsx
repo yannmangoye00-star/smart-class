@@ -1,16 +1,16 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import { LogOut, LayoutDashboard, User } from "lucide-react";
+import authService from "../services/authService";
 
 export default function MainLayout() {
   const navigate = useNavigate();
   
   // Récupération des infos de l'utilisateur connecté
-  const userRaw = localStorage.getItem("user");
-  const user = userRaw ? JSON.parse(userRaw) : null;
+  const user = authService.getCurrentUser();
 
   const handleLogout = () => {
     // Vider la session
-    localStorage.clear();
+    authService.logout();
     // Rediriger vers la connexion
     navigate("/login");
   };

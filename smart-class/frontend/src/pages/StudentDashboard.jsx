@@ -1,40 +1,69 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Award, BookOpen, CircleCheckBig, Rocket, ChevronRight, LayoutDashboard, LogOut } from 'lucide-react';
+import {
+  AlertTriangle,
+  BookOpen,
+  CircleCheckBig,
+  Clock3,
+  Rocket,
+  ChevronRight,
+  LayoutDashboard,
+  LogOut,
+  TrendingUp,
+} from 'lucide-react';
 import StatCard from '../components/StatCard.jsx';
 import SectionCard from '../components/SectionCard.jsx';
-import DataTable from '../components/DataTable.jsx';
-import StudentCourses from '../components/StudentCourses.jsx';
+import StudentCourses from '../components/StudentCourseLibrary.jsx';
 import StudentAiTutor from '../components/StudentAiTutor.jsx';
-import { useTranslation } from "react-i18next";
-
-const studentStats = [
-  { title: 'Classement', value: '#3', change: 'Top 10% de la classe', icon: Award, tone: 'blue' },
-  { title: 'Moyenne', value: '16.5 / 20', change: '+0.8 depuis le dernier bulletin', icon: CircleCheckBig, tone: 'emerald' },
-  { title: 'Progression', value: '78%', change: 'Objectif hebdomadaire atteint', icon: Rocket, tone: 'orange' },
-];
-
-const assignments = [
-  { id: 1, task: 'Fiche de maths', due: 'Aujourd’hui', score: '14/20', status: 'À rendre' },
-  { id: 2, task: 'Devoir d’histoire', due: 'Demain', score: '18/20', status: 'Corrigé' },
-  { id: 3, task: 'TP sciences', due: 'Jeudi', score: '16/20', status: 'En cours' },
-];
-
-const columns = [
-  { key: 'task', label: 'Devoir' },
-  { key: 'due', label: 'Échéance' },
-  { key: 'score', label: 'Note' },
-  { key: 'status', label: 'Statut' },
-];
+import { studentService } from '../services/studentService';
+import { useAuth } from '../hooks/useAuth';
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
+  const [dashboard, setDashboard] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    Promise.all([studentService.getDashboard(), studentService.getStats()])
+      .then(([dashboardData, statsData]) => {
+        if (active) {
+          setDashboard(dashboardData);
+          setStats(statsData);
+        }
+      })
+      .catch((requestError) => {
+        if (active) {
+          setError(requestError?.response?.data?.message || 'Impossible de charger votre tableau de bord.');
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    logout();
     navigate('/login', { replace: true });
+  };
+
+  const subjectScores = Object.entries(stats?.subjectScores || {});
+  const weakSubjects = stats?.weakSubjects || [];
+  const formatPercent = (value) => `${Number(value || 0).toFixed(0)}%`;
+  const formatStudyTime = (minutes) => {
+    const totalMinutes = Number(minutes || 0);
+    const hours = Math.floor(totalMinutes / 60);
+    const remainingMinutes = totalMinutes % 60;
+    return hours > 0 ? `${hours} h ${remainingMinutes} min` : `${remainingMinutes} min`;
   };
 
   return (
@@ -84,43 +113,86 @@ export default function StudentDashboard() {
         </div>
       </div>
 
+      {loading && (
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 text-sm text-slate-300">
+          Chargement de vos résultats...
+        </div>
+      )}
+
+      {error && (
+        <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-300">
+          {error}
+        </div>
+      )}
+
       {/* CONTENU : ONGLET 1 - VUE D'ENSEMBLE */}
       {activeTab === 'overview' && (
         <div className="space-y-6 animate-fadeIn">
           {/* STATISTIQUES CLEFS */}
           <div className="grid gap-4 md:grid-cols-3">
-            {studentStats.map((stat) => (
-              <StatCard key={stat.title} {...stat} />
-            ))}
+            <StatCard title="Score Moyen Global" value={formatPercent(stats?.globalScore)} change="Sur les quiz terminés" icon={CircleCheckBig} tone="emerald" />
+            <StatCard title="Temps d'Étude" value={formatStudyTime(stats?.totalStudyTimeMinutes)} change="Temps cumulé estimé" icon={Clock3} tone="blue" />
+            <StatCard title="Progression" value={formatPercent(stats?.overallProgress)} change="Progression globale" icon={TrendingUp} tone="orange" />
+          </div>
+
+          <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+            <SectionCard title="Scores par matière" subtitle="Résultats moyens calculés à partir de vos quiz">
+              <div className="space-y-4">
+                {subjectScores.length > 0 ? subjectScores.map(([subject, score]) => (
+                  <div key={subject} className="space-y-1.5">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-300">{subject}</span>
+                      <span className="font-semibold text-white">{formatPercent(score)}</span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-slate-950">
+                      <div
+                        className={`h-full rounded-full ${Number(score) < 60 ? 'bg-rose-500' : 'bg-blue-500'}`}
+                        style={{ width: `${Math.min(100, Math.max(0, Number(score) || 0))}%` }}
+                      />
+                    </div>
+                  </div>
+                )) : (
+                  <p className="text-sm text-slate-500">Aucun score par matière disponible.</p>
+                )}
+              </div>
+            </SectionCard>
+
+            <div className="rounded-3xl border border-amber-500/30 bg-amber-500/10 p-5">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="mt-0.5 shrink-0 text-amber-300" size={20} />
+                <div>
+                  <h2 className="font-semibold text-amber-100">Matières faibles</h2>
+                  <p className="mt-1 text-sm text-amber-200/75">À revoir en priorité lorsque le score est inférieur à 60 %.</p>
+                </div>
+              </div>
+              {weakSubjects.length > 0 ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {weakSubjects.map((subject) => (
+                    <span key={subject} className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1.5 text-sm font-medium text-amber-100">
+                      {subject}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-4 text-sm text-emerald-300">Aucune matière faible détectée.</p>
+              )}
+            </div>
           </div>
 
           {/* SECTION COURS APERÇU + TABLEAU DEVOIRS */}
           <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
             <SectionCard title="Derniers cours" subtitle="Accès rapide à votre suivi d’apprentissage">
               <div className="space-y-3 text-sm text-slate-300">
-                <div className="flex items-center justify-between rounded-xl bg-slate-800 p-3 hover:bg-slate-750 transition">
-                  <div>
-                    <p className="font-semibold text-white">Mathématiques</p>
-                    <p className="text-xs text-slate-400">Fonctions et dérivées</p>
+                {(dashboard?.recentCourses || []).map((course) => (
+                  <div key={course.id} className="flex items-center justify-between rounded-xl bg-slate-800 p-3">
+                    <div>
+                      <p className="font-semibold text-white">{course.title}</p>
+                      <p className="text-xs text-slate-400">{course.subjectName}</p>
+                    </div>
+                    <span className="text-xs text-blue-400 font-medium">Cours</span>
                   </div>
-                  <span className="text-xs text-blue-400 font-medium">89%</span>
-                </div>
-
-                <div className="flex items-center justify-between rounded-xl bg-slate-800 p-3 hover:bg-slate-750 transition">
-                  <div>
-                    <p className="font-semibold text-white">Physique</p>
-                    <p className="text-xs text-slate-400">Mécanique et énergie</p>
-                  </div>
-                  <span className="text-xs text-blue-400 font-medium">74%</span>
-                </div>
-
-                <div className="flex items-center justify-between rounded-xl bg-slate-800 p-3 hover:bg-slate-750 transition">
-                  <div>
-                    <p className="font-semibold text-white">Histoire</p>
-                    <p className="text-xs text-slate-400">Analyse de documents</p>
-                  </div>
-                  <span className="text-xs text-blue-400 font-medium">82%</span>
-                </div>
+                ))}
+                {!dashboard?.recentCourses?.length && <p className="text-xs text-slate-500">Aucun cours récent.</p>}
 
                 <button
                   onClick={() => setActiveTab('courses')}
@@ -132,55 +204,22 @@ export default function StudentDashboard() {
               </div>
             </SectionCard>
 
-            <DataTable
-              title="Gestion des devoirs"
-              subtitle="Vos tâches et notes en cours"
-              columns={columns}
-              rows={assignments}
-            />
+            <SectionCard title="Historique des notes" subtitle="Vos dernières évaluations">
+              <div className="space-y-2 text-sm">
+                {(dashboard?.scoreHistory || []).slice(0, 5).map((item) => (
+                  <div key={item.attemptId} className="flex items-center justify-between border-b border-slate-800 py-2">
+                    <span className="text-slate-300">{item.quizTitle}</span>
+                    <span className="font-semibold text-emerald-400">{item.percentage}%</span>
+                  </div>
+                ))}
+                {!dashboard?.scoreHistory?.length && <p className="text-xs text-slate-500">Aucune note disponible.</p>}
+              </div>
+            </SectionCard>
           </div>
 
           {/* TUTEUR IA INTERACTIF */}
           <StudentAiTutor />
 
-          {/* PROGRESSION DE LA SEMAINE */}
-          <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5">
-            <div className="mb-4 flex items-center gap-2 text-white">
-              <BookOpen size={18} className="text-blue-400" />
-              <h2 className="font-semibold">Progression de la semaine</h2>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl bg-slate-800 p-3 text-sm text-slate-300">
-                <div className="flex justify-between mb-1">
-                  <span>Mathématiques</span>
-                  <span className="font-bold text-white">89%</span>
-                </div>
-                <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-500 rounded-full" style={{ width: '89%' }}></div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-slate-800 p-3 text-sm text-slate-300">
-                <div className="flex justify-between mb-1">
-                  <span>Sciences</span>
-                  <span className="font-bold text-white">74%</span>
-                </div>
-                <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: '74%' }}></div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-slate-800 p-3 text-sm text-slate-300">
-                <div className="flex justify-between mb-1">
-                  <span>Français</span>
-                  <span className="font-bold text-white">82%</span>
-                </div>
-                <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
-                  <div className="h-full bg-orange-500 rounded-full" style={{ width: '82%' }}></div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       )}
 

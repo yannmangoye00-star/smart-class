@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Users,
   CheckSquare,
@@ -14,11 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import ParentAIAssistant from "../components/ParentAIAssistant.jsx";
-
-const childrenList = [
-  { id: 1, name: "Marc Floyd", class: "Terminale C", avg: "86%", homeworkCount: 4 },
-  { id: 2, name: "Sarah Floyd", class: "3ème A", avg: "91%", homeworkCount: 3 },
-];
+import parentService from "../services/parentService";
 
 const pendingHomeworks = [
   { id: 101, subject: "Mathématiques", title: "Exercices sur les Intégrales", dueDate: "Demain", urgent: true },
@@ -27,12 +23,48 @@ const pendingHomeworks = [
 ];
 
 export default function ParentDashboard() {
-  const [selectedChild, setSelectedChild] = useState(childrenList[0]);
+  const [children, setChildren] = useState([]);
+  const [selectedChild, setSelectedChild] = useState(null);
+  const [childDashboard, setChildDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [activeModal, setActiveModal] = useState(null); // 'homework' | 'event' | null
   const [isAIOpen, setIsAIOpen] = useState(false);
 
+  useEffect(() => {
+    parentService.getChildren()
+      .then((data) => {
+        setChildren(data);
+        setSelectedChild(data[0] || null);
+      })
+      .catch((requestError) => setError(requestError?.response?.data?.message || "Impossible de charger vos enfants."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (!selectedChild) {
+      setChildDashboard(null);
+      return undefined;
+    }
+
+    let active = true;
+    parentService.getChildDashboard(selectedChild.id)
+      .then((data) => {
+        if (active) setChildDashboard(data);
+      })
+      .catch((requestError) => {
+        if (active) setError(requestError?.response?.data?.message || "Impossible de charger les performances.");
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [selectedChild]);
+
   return (
     <section className="space-y-6 px-1 py-3 text-white">
+      {loading && <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4 text-sm text-slate-300">Chargement du suivi...</div>}
+      {error && <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-300">{error}</div>}
       {/* Selector d'enfant & En-tête */}
       <div className="flex flex-col gap-4 rounded-3xl border border-slate-800 bg-slate-900 p-6 md:flex-row md:items-center md:justify-between">
         <div>
@@ -55,17 +87,15 @@ export default function ParentDashboard() {
           <div className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950 p-2">
             <Users size={18} className="ml-2 text-blue-400" />
             <select
-              value={selectedChild.id}
+              value={selectedChild?.id || ""}
               onChange={(e) =>
-                setSelectedChild(
-                  childrenList.find((c) => c.id === Number(e.target.value)) || childrenList[0]
-                )
+                setSelectedChild(children.find((child) => child.id === Number(e.target.value)) || null)
               }
               className="bg-transparent text-sm font-medium text-white focus:outline-none cursor-pointer pr-2"
             >
-              {childrenList.map((child) => (
+              {children.map((child) => (
                 <option key={child.id} value={child.id} className="bg-slate-900 text-white">
-                  {child.name} ({child.class})
+                  {child.name} ({child.className || "Classe non définie"})
                 </option>
               ))}
             </select>
@@ -82,8 +112,8 @@ export default function ParentDashboard() {
               <Users size={20} />
             </div>
           </div>
-          <div className="mt-2 text-3xl font-bold">02</div>
-          <p className="mt-1 text-xs text-emerald-400">+1 ce mois</p>
+          <div className="mt-2 text-3xl font-bold">{children.length}</div>
+          <p className="mt-1 text-xs text-slate-400">Enfants reliés à votre compte</p>
         </div>
 
         <button
@@ -107,8 +137,8 @@ export default function ParentDashboard() {
               <Award size={20} />
             </div>
           </div>
-          <div className="mt-2 text-3xl font-bold">{selectedChild.avg}</div>
-          <p className="mt-1 text-xs text-emerald-400">+4.2% vs dernier trimestre</p>
+          <div className="mt-2 text-3xl font-bold">{childDashboard?.averageScore ?? 0}%</div>
+          <p className="mt-1 text-xs text-slate-400">Moyenne des quiz terminés</p>
         </div>
       </div>
 
@@ -116,29 +146,22 @@ export default function ParentDashboard() {
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         {/* Progression par matière */}
         <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-xl">
-          <h2 className="text-base font-bold">Suivi des cours ({selectedChild.name})</h2>
+          <h2 className="text-base font-bold">Suivi des cours ({selectedChild?.name || "Aucun enfant"})</h2>
           <p className="text-xs text-slate-400">Progression hebdomadaire des compétences</p>
 
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
-              <div className="flex justify-between text-sm font-medium">
-                <span>Mathématiques</span>
-                <span className="text-blue-400">89%</span>
+            {(childDashboard?.subjectPerformance || []).map((subject) => (
+              <div key={subject.subjectId} className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+                <div className="flex justify-between text-sm font-medium">
+                  <span>{subject.subjectName}</span>
+                  <span className="text-blue-400">{subject.successRate}%</span>
+                </div>
+                <div className="mt-3 h-2 w-full rounded-full bg-slate-800">
+                  <div className="h-2 rounded-full bg-blue-500" style={{ width: `${Math.min(Number(subject.successRate || 0), 100)}%` }} />
+                </div>
               </div>
-              <div className="mt-3 h-2 w-full rounded-full bg-slate-800">
-                <div className="h-2 rounded-full bg-blue-500" style={{ width: "89%" }} />
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
-              <div className="flex justify-between text-sm font-medium">
-                <span>Sciences</span>
-                <span className="text-emerald-400">76%</span>
-              </div>
-              <div className="mt-3 h-2 w-full rounded-full bg-slate-800">
-                <div className="h-2 rounded-full bg-emerald-500" style={{ width: "76%" }} />
-              </div>
-            </div>
+            ))}
+            {!childDashboard?.subjectPerformance?.length && <p className="text-xs text-slate-500">Aucune statistique disponible.</p>}
           </div>
         </div>
 
@@ -248,8 +271,8 @@ export default function ParentDashboard() {
       <ParentAIAssistant
         isOpen={isAIOpen}
         onClose={() => setIsAIOpen(false)}
-        childName={selectedChild.name}
-        childClass={selectedChild.class}
+        childName={selectedChild?.name || "Enfant"}
+        childClass={selectedChild?.className || "Classe non définie"}
       />
     </section>
   );

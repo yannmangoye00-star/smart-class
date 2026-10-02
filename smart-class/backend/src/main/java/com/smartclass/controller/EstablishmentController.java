@@ -12,6 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/establishments")
+@CrossOrigin(origins = "http://localhost:5173")
 public class EstablishmentController {
 
     private final EstablishmentRepository establishmentRepository;

@@ -71,6 +71,21 @@ const fallback = async (method, payload) => {
 };
 
 export const studentService = {
+  getDashboard: async () => {
+    const response = await api.get('/students/me/dashboard');
+    return response.data;
+  },
+
+  getStats: async () => {
+    const response = await api.get('/students/me/stats');
+    return response.data;
+  },
+
+  submitQuiz: async (payload) => {
+    const response = await api.post('/quizzes/submit', payload);
+    return response.data;
+  },
+
   list: async () => {
     try {
       const response = await api.get('/students');

@@ -49,11 +49,12 @@ export function AuthProvider({ children }) {
 
       try {
         const response = await authService.me();
+        const restoredRole = response.role || response.roles?.[0] || session.user?.role;
 
         const user = {
           email: response.email,
-          name: response.name,
-          role: normalizeRole(response.role),
+          name: response.name || session.user?.name,
+          role: normalizeRole(restoredRole).replace(/^ROLE_/, ""),
         };
 
         const updatedSession = {

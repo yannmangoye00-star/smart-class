@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { GraduationCap, LogIn } from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -9,6 +10,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -16,34 +18,13 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8080/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, role }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Identifiants incorrects ou accès refusé.");
-      }
-
-      const data = await response.json();
-      
-      // Récupération du rôle retourné par l'API (ou fallback sur la sélection)
+      const data = await login({ email, password, role });
       const userRole = data.user?.role || data.role || role;
-      
-      localStorage.setItem("token", data.token || data.accessToken || "jwt-session-token");
-      localStorage.setItem("user", JSON.stringify(data.user || { email, role: userRole }));
 
       // Redirection dynamique vers le bon dashboard
       redirectByRole(userRole);
     } catch (err) {
-      console.warn("Connexion API échouée, passage en mode fallback dev", err);
-      
-      // Stockage local de secours pour tester l'interface
-      localStorage.setItem("token", "dummy-dev-token");
-      localStorage.setItem("user", JSON.stringify({ email, role }));
-      
-      redirectByRole(role);
+      setError(err?.response?.data?.message || err.message || "Identifiants incorrects ou accès refusé.");
     } finally {
       setLoading(false);
     }
