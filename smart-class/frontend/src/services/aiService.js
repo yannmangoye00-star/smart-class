@@ -1,5 +1,7 @@
 // src/services/aiService.js
-const API_URL = "http://localhost:8080/api/ai";
+import { API_BASE_URL } from "./api";
+
+const API_URL = `${API_BASE_URL}/ai`;
 
 export const aiService = {
   // Élève : Tuteur IA

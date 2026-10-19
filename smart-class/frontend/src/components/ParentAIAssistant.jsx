@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Bot, Send, User, Sparkles, X, RefreshCw } from "lucide-react";
+import { API_BASE_URL } from "../services/api";
 
 const quickPrompts = [
   "Résumé du travail de Marc cette semaine",
@@ -45,7 +46,7 @@ export default function ParentAIAssistant({ isOpen, onClose, childName = "Marc F
 
     try {
       // Requete HTTP vers le backend Spring Boot
-      const response = await fetch("http://localhost:8080/api/ai/parent-assistant", {
+      const response = await fetch(`${API_BASE_URL}/ai/parent-assistant`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

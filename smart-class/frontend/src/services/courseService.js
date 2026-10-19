@@ -1,5 +1,6 @@
-// Remarque le /api/courses pour correspondre au backend
-const API_URL = "http://localhost:8080/api/courses"; 
+import { API_BASE_URL } from "./api";
+
+const API_URL = `${API_BASE_URL}/courses`;
 
 export const courseService = {
   getAllCourses: async () => {

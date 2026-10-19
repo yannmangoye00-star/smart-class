@@ -1,4 +1,4 @@
-import api from "./api";
+import api, { API_BASE_URL } from "./api";
 
 const courseQuizService = {
   async getCourses(subsystem) {
@@ -43,8 +43,7 @@ const courseQuizService = {
   },
 
   getPdfUrl(courseId) {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
-    return `${baseUrl}/courses/${courseId}/pdf`;
+    return `${API_BASE_URL}/courses/${courseId}/pdf`;
   },
 
   async openPdf(courseId) {
