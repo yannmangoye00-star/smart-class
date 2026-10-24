@@ -66,7 +66,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://smart-class-sigma.vercel.app"));
+        configuration.setAllowedOriginPatterns(List.of(
+                "https://smart-class-sigma.vercel.app",
+                "https://*.vercel.app",
+                "http://localhost:3000"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization"));
