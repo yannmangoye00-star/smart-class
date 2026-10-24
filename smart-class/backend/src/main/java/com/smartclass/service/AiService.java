@@ -1,6 +1,8 @@
 package com.smartclass.service;
 
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +19,8 @@ import java.util.Map;
 
 @Service
 public class AiService {
+
+    private static final Logger log = LoggerFactory.getLogger(AiService.class);
 
     @Value("${groq.api.key:NON_DEFINIE}")
     private String groqApiKey;
@@ -55,7 +59,7 @@ public class AiService {
         try {
             SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
             factory.setConnectTimeout(10000);
-            factory.setReadTimeout(10000);
+            factory.setReadTimeout(30000);
             RestTemplate restTemplate = new RestTemplate(factory);
 
             HttpHeaders headers = new HttpHeaders();
@@ -81,11 +85,11 @@ public class AiService {
                 }
             }
         } catch (HttpStatusCodeException e) {
-            System.err.println("❌ [AiService] Erreur HTTP Groq (" + e.getStatusCode() + ") : " + e.getResponseBodyAsString());
+            log.error("Erreur HTTP lors de l'appel à Groq (modèle={}, statut={}, réponse={})",
+                    groqModel, e.getStatusCode(), e.getResponseBodyAsString(), e);
             return "Désolé, une erreur technique s'est produite lors de la connexion à l'IA.";
         } catch (Exception e) {
-            System.err.println("❌ [AiService] Erreur d'appel API : " + e.getMessage());
-            e.printStackTrace();
+            log.error("Erreur lors de l'appel à l'API Groq (modèle={}): {}", groqModel, e.getMessage(), e);
             return "Désolé, une erreur technique s'est produite lors de la connexion à l'IA.";
         }
 
